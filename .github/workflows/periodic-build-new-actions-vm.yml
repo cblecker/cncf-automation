@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   build:
     name: Build new Actions VM
@@ -15,12 +19,14 @@ jobs:
     timeout-minutes: 180
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.24.x'
+          go-version-file: ci/gha-runner-vm/go.mod
 
       - name: Install OCI CLI
         env:
@@ -56,7 +62,7 @@ jobs:
 
       - name: Change Ubuntu mirrors
         if: steps.check_latest.outputs.image_exists == 'false'
-        uses: vegardit/fast-apt-mirror.sh@v1
+        uses: vegardit/fast-apt-mirror.sh@29a5ef3401107220fc3c32a0c659b6a1211f9e0f # v1.4.2
         with:
           exclude-current: true
 
@@ -112,7 +118,7 @@ jobs:
 
       - name: Upload image OCID
         if: steps.check_latest.outputs.image_exists == 'false'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@v4
         with:
           name: image-ocid
           path: /tmp/image_ocid
@@ -124,7 +130,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Start kind cluster
         run: |
@@ -202,7 +210,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Update APT
         run: |

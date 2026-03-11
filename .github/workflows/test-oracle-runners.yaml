@@ -6,6 +6,9 @@ on:
 #      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   cncf_ora_rnrs_matrix:
     strategy:
@@ -15,7 +18,9 @@ jobs:
     runs-on: ${{ matrix.cncf_runner }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Run uname to verify architecture
         run: uname -a
