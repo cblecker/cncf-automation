@@ -39,20 +39,22 @@ runs:
       run: |
         cd .cncf-automation-tool/utilities/dot-project
         go build -o ../../../.cncf-landscape-updater ./cmd/landscape-updater
-    
+
     - name: Configure Git Identity
       shell: bash
       run: |
-        git config --global user.name "landscape-pr[bot]"
-        git config --global user.email "projects@cncf.io"
+        git -C .cncf-landscape config user.name "landscape-pr[bot]"
+        git -C .cncf-landscape config user.email "projects@cncf.io"
 
     - name: Run Updater
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
+        PROJECT_FILE: ${{ inputs.project_file }}
+        LANDSCAPE_REPO: ${{ inputs.landscape_repo }}
       run: |
         ./.cncf-landscape-updater \
-          --project "${{ inputs.project_file }}" \
+          --project "${PROJECT_FILE}" \
           --landscape ".cncf-landscape/landscape.yml" \
-          --landscape-repo "${{ inputs.landscape_repo }}" \
+          --landscape-repo "${LANDSCAPE_REPO}" \
           --create-pr

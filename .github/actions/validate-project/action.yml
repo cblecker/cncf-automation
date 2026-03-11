@@ -30,26 +30,34 @@ runs:
 
     - name: Build validator
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
       run: |
         cd _cncf-automation/utilities/dot-project
-        go build -o ${{ github.workspace }}/_cncf-validator ./cmd/validator
+        go build -o "${WORKSPACE}/_cncf-validator" ./cmd/validator
 
     - name: Create project list
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
+        PROJECT_FILE: ${{ inputs.project_file }}
       run: |
-        cat > _project-list.yaml << 'PROJEOF'
+        cat > _project-list.yaml << PROJEOF
         projects:
-          - url: "file://${{ github.workspace }}/${{ inputs.project_file }}"
+          - url: "file://${WORKSPACE}/${PROJECT_FILE}"
             id: "project"
         PROJEOF
 
     - name: Validate project
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
+        OUTPUT_FORMAT: ${{ inputs.output_format }}
       run: |
-        ${{ github.workspace }}/_cncf-validator \
+        "${WORKSPACE}/_cncf-validator" \
           -config _project-list.yaml \
           -maintainers "" \
-          -output ${{ inputs.output_format }}
+          -output "${OUTPUT_FORMAT}"
 
     - name: Cleanup
       shell: bash

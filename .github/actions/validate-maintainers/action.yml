@@ -34,21 +34,28 @@ runs:
 
     - name: Build validator
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
       run: |
         cd _cncf-automation/utilities/dot-project
-        go build -o ${{ github.workspace }}/_cncf-validator ./cmd/validator
+        go build -o "${WORKSPACE}/_cncf-validator" ./cmd/validator
 
     - name: Validate maintainers
       shell: bash
+      env:
+        WORKSPACE: ${{ github.workspace }}
+        MAINTAINERS_FILE: ${{ inputs.maintainers_file }}
+        BASE_MAINTAINERS_FILE: ${{ inputs.base_maintainers_file }}
+        VERIFY_MAINTAINERS: ${{ inputs.verify_maintainers }}
       run: |
-        ARGS="-config /dev/null -maintainers ${{ inputs.maintainers_file }}"
-        if [ -n "${{ inputs.base_maintainers_file }}" ]; then
-          ARGS="$ARGS -base-maintainers ${{ inputs.base_maintainers_file }}"
+        ARGS="-config /dev/null -maintainers ${MAINTAINERS_FILE}"
+        if [ -n "${BASE_MAINTAINERS_FILE}" ]; then
+          ARGS="$ARGS -base-maintainers ${BASE_MAINTAINERS_FILE}"
         fi
-        if [ "${{ inputs.verify_maintainers }}" = "true" ]; then
+        if [ "${VERIFY_MAINTAINERS}" = "true" ]; then
           ARGS="$ARGS -verify-maintainers"
         fi
-        ${{ github.workspace }}/_cncf-validator $ARGS
+        "${WORKSPACE}/_cncf-validator" $ARGS
 
     - name: Cleanup
       shell: bash

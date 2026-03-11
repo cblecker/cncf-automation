@@ -31,8 +31,10 @@ jobs:
 
       - name: Get Base Maintainers File
         if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git show origin/${{ github.base_ref }}:utilities/dot-project/example/maintainers.yaml > utilities/dot-project/example/maintainers-base.yaml || echo "No base file found"
+          git show "origin/${BASE_REF}:utilities/dot-project/example/maintainers.yaml" > utilities/dot-project/example/maintainers-base.yaml || echo "No base file found"
 
       - name: Validate Maintainers
         env:

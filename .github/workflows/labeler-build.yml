@@ -85,8 +85,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
           file: ./utilities/labeler/Dockerfile
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          tags: ${{ steps.meta.outputs.tags }}
 
       # Uses the identity token to provision an ephemeral certificate
       # against the sigstore community Fulcio instance.
@@ -97,13 +96,8 @@ jobs:
       - name: Output image
         id: image
         run: |
-          # NOTE: We need to use the image and digest in order to make sure
-          # that the image we attest has not been modified.
-          # NOTE: The digest output from docker/build-push-action is of the
-          # form "sha256:<digest>"
-          image_name="${REGISTRY}/${IMAGE_NAME}:${{ github.ref_name }}"
-          echo "::set-output name=image::$image_name"
-  
+          echo "images=[\"${REGISTRY}/${IMAGE_NAME}:${GITHUB_REF_NAME}\"]" >> "$GITHUB_OUTPUT"
+
   # Generate SLSA provenance for the image
   # Upload the provenance to ghcr.io
   provenance:
@@ -148,8 +142,8 @@ jobs:
         run: |
           cosign version
           cosign verify-attestation \
-            --certificate-identity-regexp=".*" \
-            --certificate-oidc-issuer-regexp=".*" \
+            --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+            --certificate-identity-regexp="https://github.com/cncf/automation/.*" \
             --type slsaprovenance "${{ env.IMAGE_NAME }}@${{env.IMAGE_DIGEST}}"
       # TODO (github.com/slsa-framework/slsa-verifier/issues/92):
       #       Add step to verify using slsa-verifier

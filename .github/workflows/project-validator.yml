@@ -20,7 +20,7 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
@@ -36,7 +36,7 @@ jobs:
       uses: actions/cache@v5
       with:
         path: utilities/dot-project/.cache
-        key: ${{ runner.os }}-validator-cache-${{ github.run_id }}
+        key: ${{ runner.os }}-validator-cache-${{ hashFiles('utilities/dot-project/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-validator-cache-
 
